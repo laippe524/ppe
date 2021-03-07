@@ -357,6 +357,13 @@ class Net(nn.Module):
             elif isinstance(m, nn.Linear):
                 nn.init.constant_(m.bias, 0)
 
+    def classifier(self, inputs):
+        softmax = nn.Softmax(dim=1)
+        output = softmax(inputs)
+        mask = torch.max(output, 1).indices
+        mask = mask.squeeze(1)
+        return mask
+
 
 
     def forward(self, inputs: Tensor) -> Tensor:
@@ -412,6 +419,7 @@ class Net(nn.Module):
         concat5_y3 = self.deconv_4x_y3(y3)
         concat5 = torch.cat([feature, up5, concat5_y3, concat5_y2, y1], dim=1)#size=x
         output = self.softmax(concat5)
+        output = self.classifier(output)
         return output
 
 testnet = Net()
